@@ -1,0 +1,347 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "IERC20Vestable",
+  "sourceName": "contracts/vesting/interface/IERC20Vestable.sol",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "grantHolder",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint32",
+          "name": "onDay",
+          "type": "uint32"
+        }
+      ],
+      "name": "GrantRevoked",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "vestingLocation",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "cliffDuration",
+          "type": "uint32"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint32",
+          "name": "duration",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "interval",
+          "type": "uint32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bool",
+          "name": "isRevocable",
+          "type": "bool"
+        }
+      ],
+      "name": "VestingScheduleCreated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "beneficiary",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "vestingAmount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "startDay",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "vestingLocation",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "grantor",
+          "type": "address"
+        }
+      ],
+      "name": "VestingTokensGranted",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "grantHolder",
+          "type": "address"
+        }
+      ],
+      "name": "getIntrinsicVestingSchedule",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "cliffDuration",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "vestDuration",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "vestIntervalDays",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "beneficiary",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "totalAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "vestingAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint32",
+          "name": "startDay",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "duration",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "cliffDuration",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "interval",
+          "type": "uint32"
+        },
+        {
+          "internalType": "bool",
+          "name": "isRevocable",
+          "type": "bool"
+        }
+      ],
+      "name": "grantVestingTokens",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "ok",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "grantHolder",
+          "type": "address"
+        },
+        {
+          "internalType": "uint32",
+          "name": "onDay",
+          "type": "uint32"
+        }
+      ],
+      "name": "revokeGrant",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "today",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "dayNumber",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "onDayOrToday",
+          "type": "uint32"
+        }
+      ],
+      "name": "vestingAsOf",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "amountVested",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amountNotVested",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amountOfGrant",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint32",
+          "name": "vestStartDay",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "cliffDuration",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "vestDuration",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "vestIntervalDays",
+          "type": "uint32"
+        },
+        {
+          "internalType": "bool",
+          "name": "isActive",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
+          "name": "wasRevoked",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "grantHolder",
+          "type": "address"
+        },
+        {
+          "internalType": "uint32",
+          "name": "onDayOrToday",
+          "type": "uint32"
+        }
+      ],
+      "name": "vestingForAccountAsOf",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "amountVested",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amountNotVested",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amountOfGrant",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint32",
+          "name": "vestStartDay",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "cliffDuration",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "vestDuration",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "vestIntervalDays",
+          "type": "uint32"
+        },
+        {
+          "internalType": "bool",
+          "name": "isActive",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
+          "name": "wasRevoked",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}
