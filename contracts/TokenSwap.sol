@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract TokenSwap {
+
     IERC20 public token1;
     address public owner1;
     uint public amount1;
@@ -30,7 +31,8 @@ contract TokenSwap {
         amount2 = _amount2;
     }
 
-    function swap() external  {
+    function swap()
+    external  {
         require(msg.sender == owner1 || msg.sender == owner2, "Not authorized");
         require(
             token1.allowance(owner1, address(this)) >= amount1,
