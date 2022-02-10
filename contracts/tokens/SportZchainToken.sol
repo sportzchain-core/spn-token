@@ -108,7 +108,7 @@ contract SportZchainToken is Ownable, ERC20Pausable, ERC20Burnable {
     }
 
     /**
-    * @dev Returns to normal state. Can be paused only by the owner
+    * @dev Returns to normal state. Can be unpaused only by the owner
      */
     function unpause()
     external
