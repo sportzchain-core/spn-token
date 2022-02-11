@@ -1,16 +1,18 @@
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.2;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 
 /**
  * @dev An ERC20 implementation of the SportZchain ecosystem token. All tokens are initially pre-assigned to
  * the creator, and can later be distributed freely using transfer transferFrom and other ERC20 functions.
  */
-contract SportZchainToken is Ownable, ERC20Pausable, ERC20Burnable {
+contract SportZchainToken is Ownable, ERC20Votes, ERC20Pausable, ERC20Burnable {
 
     // SportZchain token upper limit
     uint256 supplyUpperLimit;
@@ -33,7 +35,7 @@ contract SportZchainToken is Ownable, ERC20Pausable, ERC20Burnable {
         uint8 _decimals,
         uint256 _supplyUpperLimit,
         uint256 _initialSupply
-    ) ERC20(_name, _symbol)  {
+    ) ERC20(_name, _symbol) ERC20Permit(_name) {
         decimalValue = _decimals;
         uint256 _initSupply = _initialSupply * (10 ** uint256(_decimals));
 
@@ -80,6 +82,29 @@ contract SportZchainToken is Ownable, ERC20Pausable, ERC20Burnable {
         // This is the only place where we ever burn tokens.
         _burn(msg.sender, _amount);
         supplyUpperLimit -= _amount;
+    }
+
+
+    function _mint(address to, uint256 amount)
+    internal
+    override(ERC20, ERC20Votes)
+    {
+        super._mint(to, amount);
+    }
+
+    function _burn(address account, uint256 amount)
+    internal
+    override(ERC20, ERC20Votes)
+    {
+        super._burn(account, amount);
+    }
+
+
+    function _afterTokenTransfer(address from, address to, uint256 amount)
+    internal
+    override(ERC20, ERC20Votes)
+    {
+        super._afterTokenTransfer(from, to, amount);
     }
 
     /**
