@@ -15,12 +15,21 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
  */
 contract SportZchainToken is Ownable, ERC20Pausable, ERC20Burnable, AccessControl {
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
+    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
     /**
      * @dev Throws if called by any account other than the owner.
      */
     modifier onlyBurner() {
         require(hasRole(BURNER_ROLE, msg.sender), "Caller is not a burner");
+        _;
+    }
+
+    /**
+     * @dev Throws if called by any account other than the owner.
+     */
+    modifier onlyPauser() {
+        require(hasRole(PAUSER_ROLE, msg.sender), "Caller is not a pauser");
         _;
     }
 
@@ -99,20 +108,20 @@ contract SportZchainToken is Ownable, ERC20Pausable, ERC20Burnable, AccessContro
     }
 
     /**
-     * @dev Triggers stopped state. Can be paused only by the owner
+     * @dev Triggers stopped state. Can be paused only by the pauser
      */
     function pause()
     external
-    onlyOwner {
+    onlyPauser {
         _pause();
     }
 
     /**
-    * @dev Returns to normal state. Can be unpaused only by the owner
+    * @dev Returns to normal state. Can be unpaused only by the pauser
      */
     function unpause()
     external
-    onlyOwner {
+    onlyPauser {
         _unpause();
     }
 }
