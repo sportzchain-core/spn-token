@@ -4,7 +4,7 @@ pragma solidity 0.8.2;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 
 /**
  * @title Contract for SportZchain token vesting
@@ -13,28 +13,29 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  *   tokens to any number of other addresses. Token grants support the ability to vest over time in
  *   accordance a predefined vesting schedule. A given wallet can receive no more than one token grant.
  */
-contract TokenVesting is Ownable, ReentrancyGuard{
+contract TokenVesting is AccessControl, ReentrancyGuard {
+    bytes32 public constant GRANTOR_ROLE = keccak256("GRANTOR_ROLE");
     using SafeERC20 for IERC20;
+
+    /**
+     * @dev Throws if called by any account other than the owner.
+     */
+    modifier onlyGrantor() {
+        require(hasRole(GRANTOR_ROLE, msg.sender), "Caller is not a Grantor");
+        _;
+    }
+
     struct VestingSchedule{
         bool initialized;
-        // beneficiary of tokens after they are released
-        address  beneficiary;
-        // cliff period in seconds
-        uint256  cliff;
-        // start time of the vesting period
-        uint256  start;
-        // duration of the vesting period in seconds
-        uint256  duration;
-        // duration of a slice period for the vesting in seconds
-        uint256 slicePeriodSeconds;
-        // whether or not the vesting is revocable
-        bool  revocable;
-        // total amount of tokens to be released at the end of the vesting
-        uint256 amountTotal;
-        // amount of tokens released
-        uint256  released;
-        // whether or not the vesting has been revoked
-        bool revoked;
+        address  beneficiary;       // beneficiary of tokens after they are released
+        uint256  cliff;             // cliff period in seconds
+        uint256  start;             // start time of the vesting period
+        uint256  duration;          // duration of the vesting period in seconds
+        uint256 slicePeriodSeconds; // duration of a slice period for the vesting in seconds
+        bool  revocable;            // whether or not the vesting is revocable
+        uint256 amountTotal;        // total amount of tokens to be released at the end of the vesting
+        uint256  released;          // amount of tokens released
+        bool revoked;               // whether or not the vesting has been revoked
     }
 
     // address of the ERC20 token
@@ -72,6 +73,8 @@ contract TokenVesting is Ownable, ReentrancyGuard{
     constructor(address token_) {
         require(token_ != address(0x0));
         _token = IERC20(token_);
+        // set the owner as the admin
+        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
     }
 
     receive() external payable {}
@@ -155,7 +158,7 @@ contract TokenVesting is Ownable, ReentrancyGuard{
         uint256 _amount
     )
     public
-    onlyOwner{
+    onlyGrantor  {
         require(
             this.getWithdrawableAmount() >= _amount,
             "TokenVesting: cannot create vesting schedule because not sufficient tokens"
@@ -189,7 +192,7 @@ contract TokenVesting is Ownable, ReentrancyGuard{
     */
     function revoke(bytes32 vestingScheduleId)
     public
-    onlyOwner
+    onlyGrantor
     onlyIfVestingScheduleNotRevoked(vestingScheduleId){
         VestingSchedule storage vestingSchedule = vestingSchedules[vestingScheduleId];
         require(vestingSchedule.revocable == true, "TokenVesting: vesting is not revocable");
@@ -208,10 +211,10 @@ contract TokenVesting is Ownable, ReentrancyGuard{
     */
     function withdraw(uint256 amount)
     public
-    nonReentrant
-    onlyOwner{
+    onlyGrantor
+    nonReentrant  {
         require(this.getWithdrawableAmount() >= amount, "TokenVesting: not enough withdrawable funds");
-        _token.safeTransfer(owner(), amount);
+        _token.safeTransfer(msg.sender, amount);
     }
 
     /**
@@ -225,12 +228,12 @@ contract TokenVesting is Ownable, ReentrancyGuard{
     )
     public
     nonReentrant
-    onlyIfVestingScheduleNotRevoked(vestingScheduleId){
+    onlyIfVestingScheduleNotRevoked(vestingScheduleId) {
         VestingSchedule storage vestingSchedule = vestingSchedules[vestingScheduleId];
         bool isBeneficiary = msg.sender == vestingSchedule.beneficiary;
-        bool isOwner = msg.sender == owner();
+        bool isGrantor = hasRole(GRANTOR_ROLE, msg.sender);
         require(
-            isBeneficiary || isOwner,
+            isBeneficiary || isGrantor,
             "TokenVesting: only beneficiary and owner can release vested tokens"
         );
         uint256 vestedAmount = _computeReleasableAmount(vestingSchedule);

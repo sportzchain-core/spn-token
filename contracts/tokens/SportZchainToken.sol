@@ -8,11 +8,22 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
 /**
+ * @title Contract for SportZchain token
+
  * @dev An ERC20 implementation of the SportZchain ecosystem token. All tokens are initially pre-assigned to
  * the creator, and can later be distributed freely using transfer transferFrom and other ERC20 functions.
  */
 contract SportZchainToken is Ownable, ERC20Pausable, ERC20Burnable, AccessControl {
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
+
+    /**
+     * @dev Throws if called by any account other than the owner.
+     */
+    modifier onlyBurner() {
+        require(hasRole(BURNER_ROLE, msg.sender), "Caller is not a burner");
+        _;
+    }
+
     /**
      * @dev Constructor that gives msg.sender all of existing tokens.
      *
@@ -28,32 +39,49 @@ contract SportZchainToken is Ownable, ERC20Pausable, ERC20Burnable, AccessContro
         uint256 _totalSupply
     ) ERC20(_name, _symbol)  {
         // This is the only place where we ever mint tokens for initial supply
-        _mint(msg.sender,  _totalSupply * (10 ** uint256(_decimals)));
+        _mint(_msgSender(),  _totalSupply * (10 ** uint256(_decimals)));
+
+        // set the owner as the admin
+        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
     }
 
 
     /**
-     * @dev Allow only the owner to burn tokens from the owner's wallet, also decreasing the total
-     * supply. There is no reason for a token holder to EVER call this method directly. It will be
-     * used by the future SportZchain ecosystem token contract to implement token redemption.
+     * @dev Allow only users with burner role to burn tokens from the wallet,
+     * There is no reason for a token holder to EVER call this method directly. It will be
+     * used by the future SportZchain ecosystem.
      *
-     * @param from = burn from account
      * @param _amount = token amount to burn
      */
     function burn(
-        address from,
         uint256 _amount
     )
     public
+    onlyBurner
     override (ERC20Burnable) {
-        require(hasRole(BURNER_ROLE, msg.sender), "Caller is not a burner");
-        // This is the only place where we ever burn tokens.
-        _burn(from, _amount);
+        super.burn(_amount);
     }
 
+    /**
+     * @dev Allow only users with burner role to burn tokens from the a given address,
+     * There is no reason for a token holder to EVER call this method directly. It will be
+     * used by the future SportZchain ecosystem.
+     *
+     * @param account = burn from account
+     * @param _amount = token amount to burn
+     */
+    function burnFrom(
+        address account,
+        uint256 _amount
+    )
+    public
+    onlyBurner
+    override (ERC20Burnable) {
+        super.burnFrom(account, _amount);
+    }
 
     /**
-     * @dev Overrides _afterTokenTransfer - See ERC20 and ERC20Pausable
+     * @dev Overrides _beforeTokenTransfer - See ERC20 and ERC20Pausable
      *
      * @param from = address from which the tokens needs to be transferred
      * @param to = address to  which the tokens needs to be transferred
@@ -68,7 +96,6 @@ contract SportZchainToken is Ownable, ERC20Pausable, ERC20Burnable, AccessContro
     virtual
     override (ERC20,ERC20Pausable){
         super._beforeTokenTransfer(from, to, amount);
-        require(!paused(), "ERC20Pausable: token transfer while paused");
     }
 
     /**
