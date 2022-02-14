@@ -18,7 +18,7 @@ contract SportZchainToken is Ownable, ERC20Pausable, ERC20Burnable, AccessContro
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
     /**
-     * @dev Throws if called by any account other than the owner.
+     * @dev Throws if called by any account other than the burner.
      */
     modifier onlyBurner() {
         require(hasRole(BURNER_ROLE, msg.sender), "Caller is not a burner");
@@ -26,7 +26,7 @@ contract SportZchainToken is Ownable, ERC20Pausable, ERC20Burnable, AccessContro
     }
 
     /**
-     * @dev Throws if called by any account other than the owner.
+     * @dev Throws if called by any account other than the pauser.
      */
     modifier onlyPauser() {
         require(hasRole(PAUSER_ROLE, msg.sender), "Caller is not a pauser");

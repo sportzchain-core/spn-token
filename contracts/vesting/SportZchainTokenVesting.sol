@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
  * @title Contract for SportZchain token vesting
@@ -13,7 +14,8 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
  *   tokens to any number of other addresses. Token grants support the ability to vest over time in
  *   accordance a predefined vesting schedule. A given wallet can receive no more than one token grant.
  */
-contract TokenVesting is AccessControl, ReentrancyGuard {
+contract TokenVesting is Ownable, AccessControl, ReentrancyGuard {
+    // grantor role
     bytes32 public constant GRANTOR_ROLE = keccak256("GRANTOR_ROLE");
     using SafeERC20 for IERC20;
 
@@ -41,11 +43,19 @@ contract TokenVesting is AccessControl, ReentrancyGuard {
     // address of the ERC20 token
     IERC20 immutable private _token;
 
+    // array to hold the unique vesting ids
     bytes32[] private vestingSchedulesIds;
+
+    // mapping between vesting ids and the vesting schedule
     mapping(bytes32 => VestingSchedule) private vestingSchedules;
+
+    // total amount vested
     uint256 private vestingSchedulesTotalAmount;
+
+    // count of how many vesting is mapped to an address
     mapping(address => uint256) private holdersVestingCount;
 
+    // events
     event Released(uint256 amount);
     event Revoked();
 
@@ -77,12 +87,16 @@ contract TokenVesting is AccessControl, ReentrancyGuard {
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
     }
 
+    // @dev default no action functions
     receive() external payable {}
 
+    // @dev default no action functions
     fallback() external payable {}
 
     /**
     * @dev Returns the number of vesting schedules associated to a beneficiary.
+    *
+    * @param _beneficiary - address of the beneficiary
     * @return the number of vesting schedules
     */
     function getVestingSchedulesCountByBeneficiary(address _beneficiary)
@@ -94,6 +108,8 @@ contract TokenVesting is AccessControl, ReentrancyGuard {
 
     /**
     * @dev Returns the vesting schedule id at the given index.
+    *
+    * @param index - index of the vesting
     * @return the vesting id
     */
     function getVestingIdAtIndex(uint256 index)
@@ -106,6 +122,9 @@ contract TokenVesting is AccessControl, ReentrancyGuard {
 
     /**
     * @notice Returns the vesting schedule information for a given holder and index.
+    *
+    * @param holder - Address of the holder
+    * @param index - index of the vesting
     * @return the vesting schedule structure information
     */
     function getVestingScheduleByAddressAndIndex(address holder, uint256 index)
@@ -128,7 +147,9 @@ contract TokenVesting is AccessControl, ReentrancyGuard {
     }
 
     /**
-    * @dev Returns the address of the ERC20 token managed by the vesting contract.
+    * Function to return the token
+    *
+    * @return Returns the address of the ERC20 token managed by the vesting contract.
     */
     function getToken()
     external
@@ -166,8 +187,14 @@ contract TokenVesting is AccessControl, ReentrancyGuard {
         require(_duration > 0, "TokenVesting: duration must be > 0");
         require(_amount > 0, "TokenVesting: amount must be > 0");
         require(_slicePeriodSeconds >= 1, "TokenVesting: slicePeriodSeconds must be >= 1");
+
+        // compute a unique id for the vesting schedule
         bytes32 vestingScheduleId = this.computeNextVestingScheduleIdForHolder(_beneficiary);
+
+        // set the cliff from the start time
         uint256 cliff = _start + _cliff;
+
+        // create the vesting schedule
         vestingSchedules[vestingScheduleId] = VestingSchedule(
             true,
             _beneficiary,
@@ -180,7 +207,10 @@ contract TokenVesting is AccessControl, ReentrancyGuard {
             0,
             false
         );
+
+        // total amount that was vested
         vestingSchedulesTotalAmount = vestingSchedulesTotalAmount + _amount;
+
         vestingSchedulesIds.push(vestingScheduleId);
         uint256 currentVestingCount = holdersVestingCount[_beneficiary];
         holdersVestingCount[_beneficiary] = currentVestingCount + 1;
@@ -188,6 +218,7 @@ contract TokenVesting is AccessControl, ReentrancyGuard {
 
     /**
     * @notice Revokes the vesting schedule for given identifier.
+    *
     * @param vestingScheduleId the vesting schedule identifier
     */
     function revoke(bytes32 vestingScheduleId)
@@ -230,8 +261,8 @@ contract TokenVesting is AccessControl, ReentrancyGuard {
     nonReentrant
     onlyIfVestingScheduleNotRevoked(vestingScheduleId) {
         VestingSchedule storage vestingSchedule = vestingSchedules[vestingScheduleId];
-        bool isBeneficiary = msg.sender == vestingSchedule.beneficiary;
-        bool isGrantor = hasRole(GRANTOR_ROLE, msg.sender);
+        bool isBeneficiary = _msgSender() == vestingSchedule.beneficiary;
+        bool isGrantor = hasRole(GRANTOR_ROLE, _msgSender());
         require(
             isBeneficiary || isGrantor,
             "TokenVesting: only beneficiary and owner can release vested tokens"
@@ -322,6 +353,8 @@ contract TokenVesting is AccessControl, ReentrancyGuard {
 
     /**
     * @dev Computes the releasable amount of tokens for a vesting schedule.
+    *
+    * @param vestingSchedule - VestingSchedule data structure
     * @return the amount of releasable tokens
     */
     function _computeReleasableAmount(VestingSchedule memory vestingSchedule)
@@ -329,9 +362,12 @@ contract TokenVesting is AccessControl, ReentrancyGuard {
     view
     returns(uint256){
         uint256 currentTime = getCurrentTime();
+
         if ((currentTime < vestingSchedule.cliff) || vestingSchedule.revoked == true) {
+            // time is less than cliff or vesting is revoked
             return 0;
         } else if (currentTime >= vestingSchedule.start + vestingSchedule.duration) {
+            // time is greater than vesting durations
             return vestingSchedule.amountTotal - vestingSchedule.released;
         } else {
             uint256 timeFromStart = currentTime - vestingSchedule.start;
