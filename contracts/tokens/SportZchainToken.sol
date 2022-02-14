@@ -85,6 +85,12 @@ contract SportZchainToken is Ownable, ERC20Votes, ERC20Pausable, ERC20Burnable {
     }
 
 
+    /**
+     * @dev Overrides _mint function - See ERC20 and ERC20Votes
+     *
+     * @param to = address to which the tokens needs to be minted
+     * @param amount = token amount to mint
+     */
     function _mint(address to, uint256 amount)
     internal
     override(ERC20, ERC20Votes)
@@ -92,6 +98,12 @@ contract SportZchainToken is Ownable, ERC20Votes, ERC20Pausable, ERC20Burnable {
         super._mint(to, amount);
     }
 
+    /**
+     * @dev Overrides _burn function - See ERC20 and ERC20Votes
+     *
+     * @param account = address from which the tokens needs to be burned
+     * @param amount = token amount to burn
+     */
     function _burn(address account, uint256 amount)
     internal
     override(ERC20, ERC20Votes)
@@ -99,7 +111,13 @@ contract SportZchainToken is Ownable, ERC20Votes, ERC20Pausable, ERC20Burnable {
         super._burn(account, amount);
     }
 
-
+    /**
+     * @dev Overrides _afterTokenTransfer - See ERC20 and ERC20Votes
+     *
+     * @param from = address from which the tokens needs to be transferred
+     * @param to = address to  which the tokens needs to be transferred
+     * @param amount = token amount to be transferred
+     */
     function _afterTokenTransfer(address from, address to, uint256 amount)
     internal
     override(ERC20, ERC20Votes)
@@ -108,8 +126,11 @@ contract SportZchainToken is Ownable, ERC20Votes, ERC20Pausable, ERC20Burnable {
     }
 
     /**
-     * @dev Hook that is called before any transfer of tokens. This includes
-     * minting and burning.
+     * @dev Overrides _afterTokenTransfer - See ERC20 and ERC20Pausable
+     *
+     * @param from = address from which the tokens needs to be transferred
+     * @param to = address to  which the tokens needs to be transferred
+     * @param amount = token amount to be transferred
      */
     function _beforeTokenTransfer(
         address from,
