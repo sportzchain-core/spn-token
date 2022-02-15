@@ -288,6 +288,8 @@ contract TokenVesting is Ownable, AccessControl, ReentrancyGuard {
 
     /**
     * @notice Computes the vested amount of tokens for the given vesting schedule identifier.
+    *
+    * @param vestingScheduleId - unique identifier of the vesting
     * @return the vested amount
     */
     function computeReleasableAmount(bytes32 vestingScheduleId)
@@ -301,6 +303,8 @@ contract TokenVesting is Ownable, AccessControl, ReentrancyGuard {
 
     /**
     * @notice Returns the vesting schedule information for a given identifier.
+    *
+    * @param vestingScheduleId - unique identifier of the vesting
     * @return the vesting schedule structure information
     */
     function getVestingSchedule(bytes32 vestingScheduleId)
@@ -323,6 +327,8 @@ contract TokenVesting is Ownable, AccessControl, ReentrancyGuard {
 
     /**
     * @dev Computes the next vesting schedule identifier for a given holder address.
+    *
+    * @param holder - address of the vesting holder
     */
     function computeNextVestingScheduleIdForHolder(address holder)
     public
@@ -333,6 +339,8 @@ contract TokenVesting is Ownable, AccessControl, ReentrancyGuard {
 
     /**
     * @dev Returns the last vesting schedule for a given holder address.
+    *
+    * @param holder - address of the vesting holder
     */
     function getLastVestingScheduleForHolder(address holder)
     public
@@ -343,6 +351,8 @@ contract TokenVesting is Ownable, AccessControl, ReentrancyGuard {
 
     /**
     * @dev Computes the vesting schedule identifier for an address and an index.
+    *
+    *
     */
     function computeVestingScheduleIdForAddressAndIndex(address holder, uint256 index)
     public
