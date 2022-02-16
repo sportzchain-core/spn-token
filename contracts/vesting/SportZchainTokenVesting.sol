@@ -250,6 +250,9 @@ contract TokenVesting is Ownable, AccessControl, ReentrancyGuard {
 
     /**
     * @notice Release vested amount of tokens.
+    *
+    * @dev The tokens will be transferred to the beneficiary from the grantor's wallet
+    *
     * @param vestingScheduleId the vesting schedule identifier
     * @param amount the amount to release
     */
@@ -265,7 +268,7 @@ contract TokenVesting is Ownable, AccessControl, ReentrancyGuard {
         bool isGrantor = hasRole(GRANTOR_ROLE, _msgSender());
         require(
             isBeneficiary || isGrantor,
-            "TokenVesting: only beneficiary and owner can release vested tokens"
+            "TokenVesting: only beneficiary and grantor can release vested tokens"
         );
         uint256 vestedAmount = _computeReleasableAmount(vestingSchedule);
         require(vestedAmount >= amount, "TokenVesting: cannot release tokens, not enough vested tokens");
