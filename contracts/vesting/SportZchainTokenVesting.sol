@@ -29,14 +29,14 @@ contract TokenVesting is Ownable, AccessControl, ReentrancyGuard {
 
     struct VestingSchedule{
         bool initialized;
-        address  beneficiary;       // beneficiary of tokens after they are released
-        uint256  cliff;             // cliff period in seconds
-        uint256  start;             // start time of the vesting period
-        uint256  duration;          // duration of the vesting period in seconds
+        address beneficiary;       // beneficiary of tokens after they are released
+        uint256 cliff;             // cliff period in seconds
+        uint256 start;             // start time of the vesting period
+        uint256 duration;          // duration of the vesting period in seconds
         uint256 slicePeriodSeconds; // duration of a slice period for the vesting in seconds
         bool  revocable;            // whether or not the vesting is revocable
         uint256 amountTotal;        // total amount of tokens to be released at the end of the vesting
-        uint256  released;          // amount of tokens released
+        uint256 released;          // amount of tokens released
         bool revoked;               // whether or not the vesting has been revoked
     }
 
@@ -236,22 +236,9 @@ contract TokenVesting is Ownable, AccessControl, ReentrancyGuard {
         vestingSchedule.revoked = true;
     }
 
-    /**
-    * @notice Withdraw the specified amount if possible.
-    * @param amount the amount to withdraw
-    */
-    function withdraw(uint256 amount)
-    public
-    onlyGrantor
-    nonReentrant  {
-        require(this.getWithdrawableAmount() >= amount, "TokenVesting: not enough withdrawable funds");
-        _token.safeTransfer(msg.sender, amount);
-    }
 
     /**
     * @notice Release vested amount of tokens.
-    *
-    * @dev The tokens will be transferred to the beneficiary from the grantor's wallet
     *
     * @param vestingScheduleId the vesting schedule identifier
     * @param amount the amount to release
@@ -315,6 +302,22 @@ contract TokenVesting is Ownable, AccessControl, ReentrancyGuard {
     view
     returns(VestingSchedule memory){
         return vestingSchedules[vestingScheduleId];
+    }
+
+    /**
+    * @notice Withdraw the specified amount if possible.
+    *
+    * @dev This function can be used to withdraw the available tokens
+    * with this contract to the caller
+    *
+    * @param amount the amount to withdraw
+    */
+    function withdraw(uint256 amount)
+    public
+    onlyGrantor
+    nonReentrant  {
+        require(this.getWithdrawableAmount() >= amount, "TokenVesting: not enough withdrawable funds");
+        _token.safeTransfer(msg.sender, amount);
     }
 
     /**
