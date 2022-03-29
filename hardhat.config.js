@@ -63,13 +63,11 @@ module.exports = {
              process.env.OWNER_PRIVATE_KEY_BSC !== undefined ? [process.env.OWNER_PRIVATE_KEY_BSC] : [],
         }
 	},
-	gasReporter: {
-        enabled: process.env.REPORT_GAS !== undefined,
-        currency: "USD",
-      },
-      etherscan: {
-        apiKey: process.env.ETHERSCAN_API_KEY,
-      },
-
+  gasReporter: {
+    enabled: (process.env.REPORT_GAS) ? true : false,
+    token: 'ETH',
+    gasPriceApi: 'https://api.etherscan.io/api?module=proxy&action=eth_gasPrice',
+    currency: 'USD',
+    coinmarketcap: process.env.COINMARKETCAP_API_KEY
+  },
 };
-
