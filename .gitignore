@@ -102,3 +102,9 @@ dist
 
 # TernJS port file
 .tern-port
+
+# Ignoring hardhat cache
+cache
+
+# Ignoring DS_Store
+.DS_Store
