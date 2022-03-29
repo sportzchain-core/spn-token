@@ -1,5 +1,16 @@
 {
-  "name": "hardhat-project",
+  "name": "spn-token",
+  "description": "SportZchain Smart Contracts",
+  "scripts": {
+    "compile": "npx hardhat compile",
+    "test": "npx hardhat test"
+  },
+  "keywords": [
+    "solidity",
+    "erc20"
+  ],
+  "author": "sportzchain-core",
+  "license": "MIT",
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-etherscan": "^2.1.6",
